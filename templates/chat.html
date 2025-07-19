@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Joomla ChatBot</title>
+</head>
+<body>
+    <h2>Попитай нещо за сайта</h2>
+    <form method="post">
+        <input type="text" name="question" style="width: 400px;" value="{{ question }}">
+        <button type="submit">Изпрати</button>
+    </form>
+    {% if answer %}
+        <h3>Отговор:</h3>
+        <p>{{ answer }}</p>
+    {% endif %}
+</body>
+</html>
