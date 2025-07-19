@@ -1,40 +1,48 @@
 from flask import Flask, request, render_template_string
-import datetime
+import os
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 
-# Тук замени с твоята логика за чатбота
-def chatbot_answer(question):
-    # Това е примерен отговор - после сложи твоя модел
-    return f"Отговор на '{question}': Това е примерен отговор."
-
-HTML = """
-<!doctype html>
-<title>Чатбот Joomla</title>
-<h2>Чатбот Joomla</h2>
-<form method="POST">
-  <label for="question">Питай чатбота:</label><br>
-  <input type="text" id="question" name="question" size="50" autofocus required><br><br>
-  <input type="submit" value="Попитай">
-</form>
-
-{% if answer %}
-<hr>
-<p><b>Въпрос:</b> {{ question }}</p>
-<p><b>Отговор:</b> {{ answer }}</p>
-<p><i>Време: {{ time }}</i></p>
-{% endif %}
-"""
+# Зареждане на текстовете
+TEXT_FILE = "joomla_clean_chunks.txt"
+if os.path.exists(TEXT_FILE):
+    with open(TEXT_FILE, encoding="utf-8") as f:
+        texts = [line.strip() for line in f if line.strip()]
+    vectorizer = TfidfVectorizer().fit(texts)
+    vectors = vectorizer.transform(texts)
+else:
+    texts = []
+    vectors = None
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    answer = None
-    question = None
+    answer = ""
     if request.method == "POST":
-        question = request.form.get("question", "")
-        # Тук викаш своя скрипт/функция, която дава отговор
-        answer = chatbot_answer(question)
-    return render_template_string(HTML, answer=answer, question=question, time=datetime.datetime.now())
+        user_question = request.form.get("question", "")
+        if user_question.strip() and vectors is not None:
+            question_vec = vectorizer.transform([user_question])
+            similarity = cosine_similarity(question_vec, vectors)
+            best_idx = np.argmax(similarity)
+            answer = texts[best_idx]
+        else:
+            answer = "Няма заредени текстове или въпросът е празен."
+    
+    html = """
+    <h2>Чатбот Joomla</h2>
+    <form method="post">
+        <label>Питай чатбота:</label><br>
+        <input name="question" style="width: 400px;" /><br><br>
+        <input type="submit" value="Питай" />
+    </form>
+    {% if answer %}
+        <h3>Отговор:</h3>
+        <div style="border: 1px solid #ccc; padding: 10px;">{{ answer }}</div>
+    {% endif %}
+    """
+    return render_template_string(html, answer=answer)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
