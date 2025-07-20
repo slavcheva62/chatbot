@@ -6,7 +6,7 @@ import torch
 app = Flask(__name__)
 
 # Зареждане на модела (по-малък, подходящ за Render free plan)
-model = SentenceTransformer('paraphrase-MiniLM-L3-v2')
+model = SentenceTransformer('sentence-transformers/paraphrase-albert-small-v2')
 
 # Зареждане на текстовете
 TEXT_FILE = "joomla_clean_chunks.txt"
