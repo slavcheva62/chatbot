@@ -51,7 +51,7 @@ def home():
             answer = "Няма заредени текстове или въпросът е празен."
     
     html = """
-    <h2>Чатбот на Трето ОУ</h2>
+    <h2>Чатбот на Трето ОУ "Братя Миладинови"</h2>
     <form method="post">
         <label>Питай чатбота:</label><br>
         <input name="question" style="width: 400px;" /><br><br>
